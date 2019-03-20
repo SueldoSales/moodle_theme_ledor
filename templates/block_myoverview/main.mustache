@@ -1,0 +1,28 @@
+{{#coursesview}}
+  {{#hascourses}}
+    {{#inprogress}}
+      <p>Salas atuais:</p>
+      {{> block_myoverview/courses }}
+    {{/inprogress}}
+    {{^inprogress}}
+      <p>Não há salas abertas atualmente.</p>
+    {{/inprogress}}
+    {{#future}}
+      <p>Salas previstas:</p>
+      {{> block_myoverview/courses }}
+    {{/future}}
+    {{^future}}
+      <p>Não há salas futuras programadas.</p>
+    {{/future}}
+    {{#past}}
+      <p>Salas encerradas:</p>
+      {{> block_myoverview/courses }}
+    {{/past}}
+    {{^past}}
+      <p>Não há salas encerradas.</p>
+    {{/past}}
+  {{/hascourses}}
+  {{^hascourses}}
+    <p>Você não está matriculada em sala alguma.</p>
+  {{/hascourses}}
+{{/coursesview}}

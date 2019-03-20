@@ -1,0 +1,177 @@
+
+<div class="fp-upload-form">
+
+    <div class="fp-content-center">
+        <form enctype="multipart/form-data" method="POST" class="form">
+
+        
+            <div class="fp-formset">
+                <div class="fp-file form-group">
+                    <label>{{#str}}attachment, repository{{/str}}</label>
+                    <div class="p-x-1">
+                        <input id="fileToUpload" onchange="anexado();" onclick="javascript:sArquivo();" type="file"/>
+                    </div>
+                </div>
+                <div hidden="hidden" class="fp-saveas form-group">
+                    <label>{{#str}}saveas, repository{{/str}}</label>
+                    <input type="text" class="form-control"/>
+                </div>
+                <div hidden="hidden" class="fp-setauthor form-group">
+                    <label>{{#str}}author, repository{{/str}}</label>
+                    <input type="text" class="form-control"/>
+                </div>
+                <div hidden="hidden" class="fp-setlicense control-group">
+                    <label>{{#str}}chooselicense, repository{{/str}}</label>
+                    <select class="custom-select"></select>
+                </div>
+            </div>
+        </form>
+        <div class="mdl-align">
+            <button hidden="hidden" id="subAnexoFile" onclick="uploadFile()" class="fp-upload-btn btn-primary btn">{{#str}}upload, repository{{/str}}</button>
+        </div>
+    </div>
+</div>
+{{#js}}
+require(
+    ['jquery'], 
+    function($){
+        anexado = function (){
+            {{! audioEnviando() }}
+            fileSelected();
+            sub();
+        }
+
+        sArquivo = function(){
+            console.log("selecione o arquivo...");
+            var soundSelect = new Audio('../audio/selArquivo.mp3'); 
+            soundSelect.play();
+        }
+    }
+);
+
+
+
+require(
+    ['jquery'], 
+    function($){
+        uploadFile = function (){
+            var fd = new FormData();
+            var count = document.getElementById('fileToUpload').files.length;
+            for (var index = 0; index < count; index ++){
+                var file = document.getElementById('fileToUpload').files[index];
+                fd.append('myFile', file); 
+            }
+            var xhr = new XMLHttpRequest();
+            xhr.upload.addEventListener("progress", uploadProgress, false);
+            xhr.addEventListener("load", uploadComplete, false);
+            xhr.addEventListener("error", uploadFailed, false);
+            xhr.addEventListener("abort", uploadCanceled, false);
+            xhr.open("POST", "#");
+            xhr.send(fd);
+        }
+    }
+);
+
+
+
+
+
+require(
+    ['jquery'], 
+    function($){
+        fileSelected = function (){
+            var count = document.getElementById('fileToUpload').files.length;
+            for (var index = 0; index < count; index ++){
+                var file = document.getElementById('fileToUpload').files[index];
+                var fileSize = 0;
+                if (file.size > 1024 * 1024){
+                        fileSize = (Math.round(file.size * 100 / (1024 * 1024)) / 100).toString() + 'MB';
+                        console.log("tamanho do arquivo: " + fileSize);
+                }
+                else{
+                    fileSize = (Math.round(file.size * 100 / 1024) / 100).toString() + 'KB';
+                    console.log("tamanho do arquivo: " + fileSize);
+                    
+                }
+            }
+        }
+    }
+);
+
+
+
+
+
+
+require(
+    ['jquery'], 
+    function($){
+        uploadProgress = function (evt){
+            if (evt.lengthComputable) {
+            var percentComplete = Math.round(evt.loaded * 100 / evt.total);
+            console.log("enviando... " + percentComplete + "%");
+            audioLoading();            
+
+            }
+        }
+    }
+);
+
+
+
+
+function sub(){
+    document.getElementById("subAnexoFile").click();
+    
+}
+
+function uploadComplete(evt) {
+        console.log("arquivo enviado");
+        audioLoading('stop');
+        audioEnviado();
+}
+
+function uploadFailed(evt) {
+    alert("There was an error attempting to upload the file.");
+}
+
+function uploadCanceled(evt) {
+    alert("The upload has been canceled by the user or the browser dropped the connection.");
+}
+
+
+
+function audioLoading(acao){
+    var soundLoading = new Audio('../audio/bip.mp3'); 
+    if(acao == 'stop'){
+        soundLoading.pause();
+    }
+    else{
+        {{! soundLoading.loop = true; }}
+        soundLoading.play();
+    }
+}
+
+function audioEnviado(acao){
+    var soundEnviado = new Audio('../audio/enviado.mp3'); 
+    if(acao == 'stop'){
+        soundEnviado.pause();
+    }
+    else{
+        soundEnviado.play();
+    }
+}
+        
+function audioEnviando(acao){
+    var soundEnviando = new Audio('../audio/enviando.mp3'); 
+    if(acao == 'stop'){
+        soundEnviando.pause();
+    }
+    else{
+        soundEnviando.play();
+    }
+}
+         
+
+
+{{/js}}

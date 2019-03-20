@@ -1,0 +1,16 @@
+// List Groups
+
+@mixin list-group-item-variant($state, $background, $color) {
+  .list-group-item-#{$state} {
+    color: $color;
+    background-color: $background;
+
+    &.list-group-item-action {
+      &.active {
+        color: #fff;
+        background-color: $color;
+        border-color: $color;
+      }
+    }
+  }
+}

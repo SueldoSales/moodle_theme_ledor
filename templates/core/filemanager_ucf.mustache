@@ -1,0 +1,233 @@
+
+<div class="fp-upload-form">
+    {{#options}}
+    <div class="fp-content-center">
+        {{! <form enctype="multipart/form-data" method="POST" class="form"> }}
+            <div class="fp-formset">
+                <div class="fp-file form-group">
+                    <input id="fileToUpload_{{client_id}}" type="file" class="fileToUpload" style="display: none;" 
+                           data-client_id="{{client_id}}" 
+                           data-title="{{title}}" 
+                           data-author="{{author}}" 
+                           data-license="{{defaultlicense}}" 
+                           data-itemid="{{itemid}}" 
+                           data-p="{{p}}" 
+                           data-page="{{page}}" 
+                           data-env="filemanager" 
+                           data-sesskey="{{sesskey}}" 
+                           data-itemid="{{itemid}}" 
+                           data-maxbytes="{{maxbytes}}" 
+                           data-areamaxbytes="{{areamaxbytes}}" 
+                           data-ctx_id="{{context.id}}" targetpath
+                           data-savepath="{{path.0.path}}" 
+                           data-repo_id="4" 
+                           />
+                    <input type="button" value="Adicionar arquivo"  data-client_id="{{client_id}}" class="fileToUploadButton"  />
+                </div>
+                <div hidden="hidden" class="fp-saveas form-group">
+                    <label>{{#str}}saveas, repository{{/str}}</label>
+                    <input type="text" class="form-control"/>
+                </div>
+                <div hidden="hidden" class="fp-setauthor form-group">
+                    <label>{{#str}}author, repository{{/str}}</label>
+                    <input type="text" class="form-control"/>
+                </div>
+                <div hidden="hidden" class="fp-setlicense control-group">
+                    <label>{{#str}}chooselicense, repository{{/str}}</label>
+                    <select class="custom-select"></select>
+                </div>
+            </div>
+        {{! </form> }}
+    </div>
+    <div id="filemanager-{{{client_id}}}" class="filemanager w-100 fm-loading">
+        <p><br>Arquivos adicionados:</p>
+        <ol id="fileToUploadList_{{client_id}}">
+        </ol>
+    </div>
+    {{/options}}
+</div>
+
+{{#js}}
+function ledor_readble_filesize(file) {
+    if (file.size > 1024 * 1024){
+        fileSize = (Math.round(file.size * 100 / (1024 * 1024)) / 100).toString() + 'MB';
+    }
+    else{
+        fileSize = (Math.round(file.size * 100 / 1024) / 100).toString() + 'KB';
+    }
+    return fileSize;
+}
+
+// Read cookie
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0) === ' ') {
+            c = c.substring(1,c.length);
+        }
+        if (c.indexOf(nameEQ) === 0) {
+            return c.substring(nameEQ.length,c.length);
+        }
+    }
+    return null;
+}
+
+
+getSoundBip_file = null;
+function getSoundBip() {
+    if (getSoundBip_file == null) {getSoundBip_file = new Audio('https://raw.githubusercontent.com/CoticEaDIFRN/moodle_theme_ledor/desenvolvimento/audio/bip.mp3')}
+    getSoundBip_file.loop=true
+    return getSoundBip_file;
+}
+
+getSoundSelect_file = null;
+var getSoundSelect = function() {
+    if (getSoundSelect_file == null) {getSoundSelect_file = new Audio('https://raw.githubusercontent.com/CoticEaDIFRN/moodle_theme_ledor/desenvolvimento/audio/selArquivo.mp3')}
+    return getSoundSelect_file;
+}
+
+getSoundError_file = null;
+var getSoundError = function() {
+    if (getSoundError_file == null) {getSoundError_file = new Audio('https://raw.githubusercontent.com/CoticEaDIFRN/moodle_theme_ledor/desenvolvimento/audio/erroEnvio.mp3')}
+    return getSoundError_file;
+}
+
+getSoundSent_file = null;
+function getSoundSent(acao) {
+    if (getSoundSent_file == null) {getSoundSent_file = new Audio('https://raw.githubusercontent.com/CoticEaDIFRN/moodle_theme_ledor/desenvolvimento/audio/enviado.mp3')}
+    return getSoundSent_file;
+}
+
+getRemove_file = null;
+function getRemove(acao) {
+    if (getRemove_file == null) {getRemove_file = new Audio('https://raw.githubusercontent.com/CoticEaDIFRN/moodle_theme_ledor/desenvolvimento/audio/anexoRM.mp3')}
+    return getRemove_file;
+}
+
+getErroRemove_file = null;
+function getErroRemove(acao) {
+    if (getErroRemove == null) {getErroRemove = new Audio('https://raw.githubusercontent.com/CoticEaDIFRN/moodle_theme_ledor/desenvolvimento/audio/falhaRemove.mp3')}
+    return getErroRemove;
+}
+
+
+
+
+
+require(
+    ['jquery'], 
+    function($){
+        var _soundSelect = null; 
+        var _soundBip = null;
+        // TODO: Como descobrir o root?
+        var rootMoodle = "/moodle";
+        var uploadUrl = rootMoodle + "/repository/repository_ajax.php?action=upload";
+        var listUrl = rootMoodle + "/repository/draftfiles_ajax.php?action=list";
+        var deleteUrl = rootMoodle + "/repository/draftfiles_ajax.php?action=delete";
+
+        function create_formdata(elem, file_to_upload) {
+            var formData = new FormData();
+            if (file_to_upload){
+                formData.append('repo_upload_file', file_to_upload);
+            }
+            for (var key in  elem.dataset) {
+                formData.append(key, elem.dataset[key])
+            }
+            return formData;
+        }
+
+        function delete_button(evt) {
+            paizao = $(this.dataset['paizaoid'])[0];
+            var formdata = create_formdata(paizao);
+            formdata.append('filename', this.dataset['filename']);
+            formdata.append('filepath', this.dataset['filepath']);
+            $.ajax({url: deleteUrl, 
+                    type: "POST", 
+                    data: formdata,
+                    contentType: false, 
+                    cache: false, 
+                    processData: false, 
+                    paizao: paizao,
+                    success: function(data) {
+                        if (data['error']) {
+                            return getErroRemove().play();
+                        }
+                        {{! return getRemove_file().play(); }}
+                        {{! console.log("removeu um arquivo"); }}
+                        {{! getSoundSelect().play(); }}
+                        getRemove().play();
+                        {{! testeSong = new Audio('../audio/arquivoRemovido.mp3'); }}
+                        {{! testeSong.play(); }}
+                        $( ".fileToUpload" ).trigger( "fileToUpload:refresh" );
+
+                    }, 
+            });
+        }
+
+        $('.fileToUploadButton').click(function(evt){
+            getSoundSelect().play();
+            $(evt.target).prev().click();
+        });
+
+
+        $( ".fileToUpload" ).on( "fileToUpload:refresh", function( evt ) {
+            $('#fileToUploadList_' + this.dataset['client_id']).html('Lendo...');
+            $.ajax({url: listUrl, 
+                    type: "POST", 
+                    data: create_formdata(this),
+                    contentType: false, 
+                    cache: false, 
+                    processData: false, 
+                    elem: this,
+                    success: function(data) {
+                        $('#fileToUploadList_' + this.elem.dataset['client_id']).html('');
+                        var files = data.list;
+                        for (var index = 0; index < files.length; index++) { 
+                            var paizaoId = '#fileToUploadList_' + this.elem.dataset['client_id'];
+                            file = files[index];
+                            var item = $('<li><a href="' + file.url +  '" class="fileToUploadDelete">' + file.filename + '</a> (' + file.filesize + ')</li>');
+                            var del = $('<a href="#" class="fp-file-delete btn btn-secondary" data-paizaoid="#' + this.elem.id + '" data-filename="' + file.filename + '" data-filepath="' + file.filepath + '">{{#str}}delete{{/str}}</a>');
+                            del.click(delete_button)
+                            item.append(del);
+                            del.paizao = this.elem;
+                            $(paizaoId).append(item);
+                        }
+                    }, 
+            });
+        });
+
+        
+        $('.fileToUpload').change(function(evt){
+            var elem = evt.target;
+            for (var index = 0; index < elem.files.length; index ++){
+                var file = elem.files[index];
+                getSoundBip().play();
+                $.ajax({url: uploadUrl, 
+                        type: "POST", 
+                        data: create_formdata(elem, file),
+                        contentType: false, 
+                        cache: false, 
+                        processData: false, 
+                        success: function(data) {
+                            getSoundBip().pause();
+                            if (data['error']) {
+                                getSoundError().play();
+                                return;
+                            }
+                            $( elem ).trigger( "fileToUpload:refresh" );
+                            getSoundSent().play();
+                        }, 
+                        error: function(data) {
+                            getSoundBip().pause();
+                            getSoundError().play();
+                        }
+                });
+            }
+        });
+        $( ".fileToUpload" ).trigger( "fileToUpload:refresh" );
+    }
+);
+{{/js}}
+
