@@ -74,7 +74,7 @@ function theme_ledor_get_main_scss_content($theme) {
  * @param theme_config $theme The theme config object.
  * @return array
  */
-function theme_boost_eadifrn_get_pre_scss($theme) {
+function theme_ledor_get_pre_scss($theme) {
     global $CFG;
     // MODIFICATION START.
     require_once($CFG->dirroot . '/theme/boost_eadifrn/locallib.php');
@@ -132,14 +132,14 @@ function theme_boost_eadifrn_get_pre_scss($theme) {
  *
  * @param stdClass $course course object
  * @param stdClass $cm course module
- * @param stdClass $context context object
+ * @param stdClass $context context object 
  * @param string $filearea file area
  * @param array $args extra arguments
  * @param bool $forcedownload whether or not force download
  * @param array $options additional options affecting the file serving
  * @return bool
  */
-function theme_boost_eadifrn_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = array()) {
+function theme_ledor_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = array()) {
     if ($context->contextlevel == CONTEXT_SYSTEM) {
         $theme = theme_config::load('boost_eadifrn');
         if ($filearea === 'favicon') {
@@ -161,7 +161,7 @@ function theme_boost_eadifrn_pluginfile($course, $cm, $context, $filearea, $args
 /**
  * If setting is updated, use this callback to clear the theme_boost_eadifrn' own application cache.
  */
-function theme_boost_eadifrn_reset_app_cache() {
+function theme_ledor_reset_app_cache() {
     // Get the cache from area.
     $themeboosteadifrncache = cache::make('theme_boost_eadifrn', 'imagearea');
     // Delete the cache for the imagearea.
