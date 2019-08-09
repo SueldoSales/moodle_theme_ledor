@@ -275,7 +275,7 @@ class ledor_menu_item {
     }
 }
 
-function get_ledor_bottom_menu()
+function get_ledor_top_menu()
 {
     /***
      * Isto deveria vir de configuração do tema salvo no banco.
@@ -283,13 +283,24 @@ function get_ledor_bottom_menu()
     global $PAGE, $COURSE, $USER;
     $result = [];
     if ($PAGE->pagelayout == "course" || $PAGE->pagelayout == "incourse") {
-        $result[] = new ledor_menu_item("Notas", "/grade/report/index.php", ['id'=>$COURSE->id]);
-        $result[] = new ledor_menu_item("Participantes", "/user/index.php", ['id'=>$COURSE->id]);
-        $result[] = new ledor_menu_item("Emblemas", "/badges/view.php", ['type'=>2, 'id'=>$COURSE->id]);
-        $result[] = new ledor_menu_item("Competências", "/admin/tool/lp/coursecompetencies.php", ['courseid'=>$COURSE->id]);
+        $result[] = new ledor_menu_item("Voltar ao curso: $COURSE->fullname ", "/course/view.php", ['id'=>$COURSE->id]);
+        $result[] = new ledor_menu_item("Voltar a Página inicial", "/", []);
     }
+    
+    else {
+        $result[] = new ledor_menu_item("Página inicial do site: $SITE->shortname", "/", []);    
+    }
+    return new ArrayIterator($result);
+}
 
-    $result[] = new ledor_menu_item("Página inicial", "/", []);
+function get_ledor_bottom_menu()
+{
+    /***
+     * Isto deveria vir de configuração do tema salvo no banco.
+     */
+    global $PAGE, $COURSE, $USER;
+    $result = [];
+    $result[] = new ledor_menu_item("Página inicial do site: $SITE->shortname", "/", []);    
     $result[] = new ledor_menu_item("Perfil", "/user/profile.php", ['id'=>$USER->id]);
     $result[] = new ledor_menu_item("Mensagens", "/message/", []);
     $result[] = new ledor_menu_item("Notificações", "/message/output/popup/notifications.php", []);
@@ -308,6 +319,7 @@ function get_ledor_template_context()
     if ($templatecontext['in_course_page'] || $templatecontext['within_course_page']) {
         $templatecontext['course_summary'] = get_ledor_course_summary();
     }
+    $templatecontext['top_menu'] = get_ledor_top_menu();
     $templatecontext['bottom_menu'] = get_ledor_bottom_menu();
     // $templatecontext['nosso_calendario'] = get_ledor_calendario();
     return $templatecontext;

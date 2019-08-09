@@ -40,14 +40,19 @@
         {{! </form> }}
     </div>
     <div id="filemanager-{{{client_id}}}" class="filemanager w-100 fm-loading">
-        <p><br>Arquivos adicionados:</p>
+        {{! <p><br>Arquivos adicionados:</p> }}
+        <p id="numeroArquivos"></p>
         <ol id="fileToUploadList_{{client_id}}">
         </ol>
     </div>
     {{/options}}
 </div>
 
+
 {{#js}}
+
+
+ 
 function ledor_readble_filesize(file) {
     if (file.size > 1024 * 1024){
         fileSize = (Math.round(file.size * 100 / (1024 * 1024)) / 100).toString() + 'MB';
@@ -77,38 +82,38 @@ function readCookie(name) {
 
 getSoundBip_file = null;
 function getSoundBip() {
-    if (getSoundBip_file == null) {getSoundBip_file = new Audio('https://raw.githubusercontent.com/CoticEaDIFRN/moodle_theme_ledor/desenvolvimento/audio/bip.mp3')}
+    if (getSoundBip_file == null) {getSoundBip_file = new Audio('https://raw.githubusercontent.com/CoticEaDIFRN/moodle_theme_ledor2/master/audio/bip.mp3')}
     getSoundBip_file.loop=true
     return getSoundBip_file;
 }
 
 getSoundSelect_file = null;
 var getSoundSelect = function() {
-    if (getSoundSelect_file == null) {getSoundSelect_file = new Audio('https://raw.githubusercontent.com/CoticEaDIFRN/moodle_theme_ledor/desenvolvimento/audio/selArquivo.mp3')}
+    if (getSoundSelect_file == null) {getSoundSelect_file = new Audio('https://raw.githubusercontent.com/CoticEaDIFRN/moodle_theme_ledor2/master/audio/selArquivo.mp3')}
     return getSoundSelect_file;
 }
 
 getSoundError_file = null;
 var getSoundError = function() {
-    if (getSoundError_file == null) {getSoundError_file = new Audio('https://raw.githubusercontent.com/CoticEaDIFRN/moodle_theme_ledor/desenvolvimento/audio/erroEnvio.mp3')}
+    if (getSoundError_file == null) {getSoundError_file = new Audio('https://raw.githubusercontent.com/CoticEaDIFRN/moodle_theme_ledor2/master/audio/erroEnvio.mp3')}
     return getSoundError_file;
 }
 
 getSoundSent_file = null;
 function getSoundSent(acao) {
-    if (getSoundSent_file == null) {getSoundSent_file = new Audio('https://raw.githubusercontent.com/CoticEaDIFRN/moodle_theme_ledor/desenvolvimento/audio/enviado.mp3')}
+    if (getSoundSent_file == null) {getSoundSent_file = new Audio('https://raw.githubusercontent.com/CoticEaDIFRN/moodle_theme_ledor2/master/audio/enviado.mp3')}
     return getSoundSent_file;
 }
 
 getRemove_file = null;
 function getRemove(acao) {
-    if (getRemove_file == null) {getRemove_file = new Audio('https://raw.githubusercontent.com/CoticEaDIFRN/moodle_theme_ledor/desenvolvimento/audio/anexoRM.mp3')}
+    if (getRemove_file == null) {getRemove_file = new Audio('https://raw.githubusercontent.com/CoticEaDIFRN/moodle_theme_ledor2/master/audio/anexoRM.mp3')}
     return getRemove_file;
 }
 
 getErroRemove_file = null;
 function getErroRemove(acao) {
-    if (getErroRemove == null) {getErroRemove = new Audio('https://raw.githubusercontent.com/CoticEaDIFRN/moodle_theme_ledor/desenvolvimento/audio/falhaRemove.mp3')}
+    if (getErroRemove == null) {getErroRemove = new Audio('https://raw.githubusercontent.com/CoticEaDIFRN/moodle_theme_ledor2/master/audio/falhaRemove.mp3')}
     return getErroRemove;
 }
 
@@ -122,7 +127,7 @@ require(
         var _soundSelect = null; 
         var _soundBip = null;
         // TODO: Como descobrir o root?
-        var rootMoodle = "/ava/academico";
+        var rootMoodle = "/moodle";
         var uploadUrl = rootMoodle + "/repository/repository_ajax.php?action=upload";
         var listUrl = rootMoodle + "/repository/draftfiles_ajax.php?action=list";
         var deleteUrl = rootMoodle + "/repository/draftfiles_ajax.php?action=delete";
@@ -138,6 +143,7 @@ require(
             return formData;
         }
 
+        {{! função para excluir arquivos }}
         function delete_button(evt) {
             paizao = $(this.dataset['paizaoid'])[0];
             var formdata = create_formdata(paizao);
@@ -154,26 +160,27 @@ require(
                         if (data['error']) {
                             return getErroRemove().play();
                         }
-                        {{! return getRemove_file().play(); }}
-                        {{! console.log("removeu um arquivo"); }}
-                        {{! getSoundSelect().play(); }}
                         getRemove().play();
-                        {{! testeSong = new Audio('../audio/arquivoRemovido.mp3'); }}
-                        {{! testeSong.play(); }}
                         $( ".fileToUpload" ).trigger( "fileToUpload:refresh" );
 
                     }, 
             });
         }
 
+        {{! Carregando itens na pasta temporária }}
+        $( document ).ready(function() {
+            $( ".fileToUpload" ).trigger( "fileToUpload:refresh" );
+        });
+
+        {{! função caixa de seleção de arquivos }}
         $('.fileToUploadButton').click(function(evt){
             getSoundSelect().play();
             $(evt.target).prev().click();
         });
 
-
+        {{! obtem o arquivo enviado e insere numa lista junto com os que ja estavam anexados }}
         $( ".fileToUpload" ).on( "fileToUpload:refresh", function( evt ) {
-            $('#fileToUploadList_' + this.dataset['client_id']).html('Lendo...');
+            $('#fileToUploadList_' + this.dataset['client_id']).html('');
             $.ajax({url: listUrl, 
                     type: "POST", 
                     data: create_formdata(this),
@@ -187,13 +194,17 @@ require(
                         for (var index = 0; index < files.length; index++) { 
                             var paizaoId = '#fileToUploadList_' + this.elem.dataset['client_id'];
                             file = files[index];
-                            var item = $('<li><a href="' + file.url +  '" class="fileToUploadDelete">' + file.filename + '</a> (' + file.filesize + ')</li>');
-                            var del = $('<a href="#" class="fp-file-delete btn btn-secondary" data-paizaoid="#' + this.elem.id + '" data-filename="' + file.filename + '" data-filepath="' + file.filepath + '">{{#str}}delete{{/str}}</a>');
+                            var item = $('<li><a href="' + file.url +  '" class="fileToUploadDelete">Baixar: ' + file.filename + ' (' + file.filesize + ')</a></li>');
+                            var del = $('<br><a href="#" class="fp-file-delete btn btn-secondary" data-paizaoid="#' + this.elem.id + '" data-filename="' + file.filename + '" data-filepath="' + file.filepath + '"><font color="#D36083">{{#str}}delete{{/str}}: ' + file.filename + '</font></a><br><br>');
                             del.click(delete_button)
                             item.append(del);
                             del.paizao = this.elem;
                             $(paizaoId).append(item);
                         }
+
+                        var total = document.querySelectorAll('font').length;
+                        mydiv = document.getElementById("numeroArquivos");
+                        mydiv.innerHTML = "<b>Arquivos Adicionados: " + total + "</b>";
                     }, 
             });
         });
@@ -229,5 +240,7 @@ require(
         $( ".fileToUpload" ).trigger( "fileToUpload:refresh" );
     }
 );
+
+
 {{/js}}
 

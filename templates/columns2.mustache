@@ -52,9 +52,9 @@
 
 <body {{{ bodyattributes }}}>
   <a class="sr-only sr-only-focusable" href="#maincontent">Ir para o conteúdo principal</a>
-  {{> theme_ledor/footer }}
   <header id="page-fullheader">
     <p>{{{contextheader}}}</p>
+    {{> theme_ledor/top_menu }}
   </header>
   <div id="page-content" class="row">
       <section id="region-main" {{#hasblocks}}class="has-blocks mb-3"{{/hasblocks}}>
@@ -73,6 +73,7 @@
   </div>
 
 <footer id="page-footer" class="py-3 bg-dark text-light">
+  {{> theme_ledor/footer }}
         {{{ output.standard_footer_html }}}
         {{{ output.standard_end_of_body_html }}}
 </footer>

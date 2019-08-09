@@ -1,11 +1,7 @@
-# Moodle Theme Ledor
+# moodle_theme_ledor
 
-Tema do Moodle para ledores de tela.
+## Guia de acessibilidade
 
-- Dentro da pasta *theme*:
-
-```
-sudo git clone https://github.com/SueldoSales/moodle_theme_ledor.git ledor
-
-sudo chown www-data: ledor
-```
+- O título das páginas deve dizer "Este é o diário: asdf"
+- O título da atividade deve dizer "Você está no questionário: X"
+- Este é o fim do questionário: Dados sócio-acadêmicos
