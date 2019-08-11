@@ -1,4 +1,4 @@
-# Moodle Theme Ledor
+# Moodle Theme Ledor V02
 
 Tema do Moodle para ledores de tela.
 
